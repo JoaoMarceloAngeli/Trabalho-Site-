@@ -1,0 +1,12 @@
+{
+  "name": "plataforma-cursos-online",
+  "version": "1.0.0",
+  "description": "LAB03 - Plataforma de Cursos Online",
+  "main": "main.mjs",
+  "type": "module",
+  "scripts": {
+    "start": "node main.mjs"
+  },
+  "author": "Aluno",
+  "license": "ISC"
+}

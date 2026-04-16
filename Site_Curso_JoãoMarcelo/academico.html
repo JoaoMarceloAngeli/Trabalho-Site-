@@ -1,0 +1,403 @@
+<script>
+    const user = sessionStorage.getItem('usuarioLogado');
+    if (!user) {
+        window.location.href = 'login.html';
+    } else {
+        const parsed = JSON.parse(user);
+        if(parsed.Papel !== 'Admin' && parsed.Email !== 'admin@formapro.com') {
+            window.location.href = 'home_aluno.html';
+        }
+    }
+</script>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Módulo Acadêmico - Cursos com Curso</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-light">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm glassmorphism">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="index.html">
+                <i class="bi bi-mortarboard-fill me-2"></i>Cursos com Curso
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="index.html">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link active" aria-current="page" href="academico.html">Módulo Acadêmico</a></li>
+                    <li class="nav-item"><a class="nav-link" href="financeiro.html">Assinaturas</a></li>
+                    <li class="nav-item"><a class="nav-link" href="alunos.html">Área do Aluno</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container my-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold">Gestão Acadêmica</h2>
+        </div>
+
+        <!-- Navegação em Abas -->
+        <ul class="nav nav-tabs mb-4" id="academicoTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="categorias-tab" data-bs-toggle="tab" data-bs-target="#categorias" type="button" role="tab">Categorias</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="cursos-tab" data-bs-toggle="tab" data-bs-target="#cursos" type="button" role="tab">Cursos</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="modulos-tab" data-bs-toggle="tab" data-bs-target="#modulos" type="button" role="tab">Módulos</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="aulas-tab" data-bs-toggle="tab" data-bs-target="#aulas" type="button" role="tab">Aulas</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="trilhas-tab" data-bs-toggle="tab" data-bs-target="#trilhas" type="button" role="tab">Trilhas</button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="academicoTabsContent">
+            <!-- TAB CATEGORIAS -->
+            <div class="tab-pane fade show active" id="categorias" role="tabpanel">
+                <div class="row">
+                    <!-- Formulário Categorias -->
+                    <div class="col-md-4 mb-4">
+                        <div class="card shadow-sm border-0">
+                            <div class="card-header bg-white text-primary fw-bold">Nova Categoria</div>
+                            <div class="card-body">
+                                <form id="form-categoria">
+                                    <div class="mb-3">
+                                        <label for="cat-nome" class="form-label">Nome da Categoria</label>
+                                        <input type="text" class="form-control" id="cat-nome" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="cat-desc" class="form-label">Descrição</label>
+                                        <textarea class="form-control" id="cat-desc" rows="3"></textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary w-100">Salvar Categoria</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Lista Categorias -->
+                    <div class="col-md-8">
+                        <div class="card shadow-sm border-0">
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>Nome</th>
+                                                <th>Descrição</th>
+                                                <th>Ação</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="lista-categorias">
+                                            <!-- Conteúdo gerado -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB CURSOS -->
+            <div class="tab-pane fade" id="cursos" role="tabpanel">
+                <div class="row">
+                    <!-- Formulário Cursos -->
+                    <div class="col-md-4 mb-4">
+                        <div class="card shadow-sm border-0">
+                            <div class="card-header bg-white text-success fw-bold">Novo Curso</div>
+                            <div class="card-body">
+                                <form id="form-curso">
+                                    <div class="mb-3">
+                                        <label for="cur-titulo" class="form-label">Título</label>
+                                        <input type="text" class="form-control" id="cur-titulo" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="cur-cat" class="form-label">Categoria</label>
+                                        <select class="form-select" id="cur-cat" required>
+                                            <option value="">Selecione...</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="cur-nivel" class="form-label">Nível</label>
+                                        <select class="form-select" id="cur-nivel" required>
+                                            <option value="Iniciante">Iniciante</option>
+                                            <option value="Intermediário">Intermediário</option>
+                                            <option value="Avançado">Avançado</option>
+                                        </select>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col-6">
+                                            <label for="cur-aulas" class="form-label">Qtd. Aulas</label>
+                                            <input type="number" class="form-control" id="cur-aulas" required min="1">
+                                        </div>
+                                        <div class="col-6">
+                                            <label for="cur-horas" class="form-label">Horas Totais</label>
+                                            <input type="number" class="form-control" id="cur-horas" required min="1">
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="btn btn-success w-100">Criar Curso</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Lista Cursos -->
+                    <div class="col-md-8">
+                        <div class="card shadow-sm border-0">
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Título</th>
+                                                <th>Categoria</th>
+                                                <th>Nível</th>
+                                                <th>Detalhes</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="lista-cursos">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB MÓDULOS -->
+            <div class="tab-pane fade" id="modulos" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-4 mb-4">
+                        <div class="card shadow-sm border-0">
+                            <div class="card-header bg-white text-warning fw-bold">Novo Módulo</div>
+                            <div class="card-body">
+                                <form id="form-modulo">
+                                    <div class="mb-3">
+                                        <label for="mod-curso" class="form-label">Curso</label>
+                                        <select class="form-select" id="mod-curso" required>
+                                            <option value="">Selecione o Curso...</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="mod-titulo" class="form-label">Título do Módulo</label>
+                                        <input type="text" class="form-control" id="mod-titulo" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="mod-ordem" class="form-label">Ordem</label>
+                                        <input type="number" class="form-control" id="mod-ordem" required min="1" value="1">
+                                    </div>
+                                    <button type="submit" class="btn btn-warning w-100 text-dark fw-bold">Salvar Módulo</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="card shadow-sm border-0">
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Ordem</th>
+                                                <th>Título</th>
+                                                <th>Curso</th>
+                                                <th>Ação</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="lista-modulos"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB AULAS -->
+            <div class="tab-pane fade" id="aulas" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-4 mb-4">
+                        <div class="card shadow-sm border-0">
+                            <div class="card-header bg-white text-info fw-bold">Nova Aula</div>
+                            <div class="card-body">
+                                <form id="form-aula">
+                                    <div class="mb-3">
+                                        <label for="aula-modulo" class="form-label">Módulo</label>
+                                        <select class="form-select" id="aula-modulo" required>
+                                            <option value="">Selecione o Módulo...</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="aula-titulo" class="form-label">Título da Aula</label>
+                                        <input type="text" class="form-control" id="aula-titulo" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="aula-tipo" class="form-label">Tipo de Conteúdo</label>
+                                        <select class="form-select" id="aula-tipo" required>
+                                            <option value="Vídeo">Vídeo</option>
+                                            <option value="Texto">Texto</option>
+                                            <option value="Quiz">Quiz</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="aula-url" class="form-label">URL do Conteúdo</label>
+                                        <input type="url" class="form-control" id="aula-url" placeholder="https://...">
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col-6">
+                                            <label for="aula-duracao" class="form-label">Duração (min)</label>
+                                            <input type="number" class="form-control" id="aula-duracao" required min="1" value="10">
+                                        </div>
+                                        <div class="col-6">
+                                            <label for="aula-ordem" class="form-label">Ordem</label>
+                                            <input type="number" class="form-control" id="aula-ordem" required min="1" value="1">
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="btn btn-info w-100 text-white fw-bold">Salvar Aula</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="card shadow-sm border-0">
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Ord.</th>
+                                                <th>Título</th>
+                                                <th>Módulo</th>
+                                                <th>Tipo</th>
+                                                <th>Duração</th>
+                                                <th>Ação</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="lista-aulas"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB TRILHAS -->
+            <div class="tab-pane fade" id="trilhas" role="tabpanel">
+                <div class="row mb-4">
+                    <!-- Formulário Trilha -->
+                    <div class="col-md-4 mb-4">
+                        <div class="card shadow-sm border-0">
+                            <div class="card-header bg-white text-purple fw-bold" style="color:#7c3aed">Nova Trilha</div>
+                            <div class="card-body">
+                                <form id="form-trilha">
+                                    <div class="mb-3">
+                                        <label for="tri-titulo" class="form-label">Título da Trilha</label>
+                                        <input type="text" class="form-control" id="tri-titulo" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="tri-desc" class="form-label">Descrição</label>
+                                        <textarea class="form-control" id="tri-desc" rows="2"></textarea>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="tri-cat" class="form-label">Categoria</label>
+                                        <select class="form-select" id="tri-cat" required>
+                                            <option value="">Selecione...</option>
+                                        </select>
+                                    </div>
+                                    <button type="submit" class="btn w-100 fw-bold text-white" style="background:#7c3aed">Criar Trilha</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Lista Trilhas -->
+                    <div class="col-md-8">
+                        <div class="card shadow-sm border-0">
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>Título</th>
+                                                <th>Categoria</th>
+                                                <th>Ação</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="lista-trilhas"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Associar Curso à Trilha -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card shadow-sm border-0">
+                            <div class="card-header bg-white fw-bold">Associar Curso à Trilha</div>
+                            <div class="card-body">
+                                <form id="form-trilha-curso" class="row g-3 align-items-end">
+                                    <div class="col-md-4">
+                                        <label for="tc-trilha" class="form-label">Trilha</label>
+                                        <select class="form-select" id="tc-trilha" required>
+                                            <option value="">Selecione a Trilha...</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="tc-curso" class="form-label">Curso</label>
+                                        <select class="form-select" id="tc-curso" required>
+                                            <option value="">Selecione o Curso...</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label for="tc-ordem" class="form-label">Ordem</label>
+                                        <input type="number" class="form-control" id="tc-ordem" required min="1" value="1">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button type="submit" class="btn btn-secondary w-100">Associar</button>
+                                    </div>
+                                </form>
+                                <div class="table-responsive mt-3">
+                                    <table class="table table-sm table-hover align-middle">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Trilha</th>
+                                                <th>Curso</th>
+                                                <th>Ordem</th>
+                                                <th>Ação</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="lista-trilhas-cursos"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Entry module -->
+    <script type="module" src="controller/AcademicoController.mjs"></script>
+</body>
+</html>

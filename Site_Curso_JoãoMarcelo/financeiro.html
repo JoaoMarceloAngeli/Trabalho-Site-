@@ -1,0 +1,164 @@
+<script>
+    const user = sessionStorage.getItem('usuarioLogado');
+    if (!user) {
+        window.location.href = 'login.html';
+    } else {
+        const parsed = JSON.parse(user);
+        if(parsed.Papel !== 'Admin' && parsed.Email !== 'admin@formapro.com') {
+            window.location.href = 'home_aluno.html';
+        }
+    }
+</script>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Módulo Financeiro - Cursos com Curso</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-light">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm glassmorphism">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="index.html">
+                <i class="bi bi-mortarboard-fill me-2"></i>Cursos com Curso
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="index.html">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="academico.html">Módulo Acadêmico</a></li>
+                    <li class="nav-item"><a class="nav-link active" aria-current="page" href="financeiro.html">Assinaturas</a></li>
+                    <li class="nav-item"><a class="nav-link" href="alunos.html">Área do Aluno</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container my-5">
+        <h2 class="fw-bold mb-4">Gestão de Assinaturas e Planos</h2>
+
+        <div class="row mb-5" id="vitrine-planos">
+            <!-- Planos carregados via JS -->
+            <div class="col-md-4">
+                <div class="card h-100 shadow border-primary course-card">
+                    <div class="card-body text-center p-4">
+                        <h4 class="fw-bold text-primary">Plano Mensal</h4>
+                        <h2 class="display-5 fw-bold my-3">R$ 49<small class="fs-5 text-muted">/mês</small></h2>
+                        <ul class="list-unstyled mb-4">
+                            <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Acesso a todos os cursos</li>
+                            <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Certificados digitais</li>
+                            <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Suporte comunitário</li>
+                        </ul>
+                        <button class="btn btn-outline-primary w-100 rounded-pill btn-assinar" data-plano="1">Assinar Agora</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card h-100 shadow border-0 gradient-hero text-white course-card position-relative">
+                    <span class="badge bg-warning text-dark position-absolute top-0 start-50 translate-middle rounded-pill">Mais Popular</span>
+                    <div class="card-body text-center p-4">
+                        <h4 class="fw-bold">Plano Semestral</h4>
+                        <h2 class="display-5 fw-bold my-3 text-white">R$ 249<small class="fs-5 text-white-50">/semestre</small></h2>
+                        <ul class="list-unstyled mb-4">
+                            <li class="mb-2"><i class="bi bi-check-circle-fill text-warning me-2"></i>Todos os benefícios mensais</li>
+                            <li class="mb-2"><i class="bi bi-check-circle-fill text-warning me-2"></i>Economia de 15%</li>
+                            <li class="mb-2"><i class="bi bi-check-circle-fill text-warning me-2"></i>Acesso VIP ao Fórum</li>
+                        </ul>
+                        <button class="btn btn-light w-100 rounded-pill text-primary fw-bold btn-assinar" data-plano="2">Assinar Agora</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card h-100 shadow border-success course-card">
+                    <div class="card-body text-center p-4">
+                        <h4 class="fw-bold text-success">Plano Anual</h4>
+                        <h2 class="display-5 fw-bold my-3">R$ 399<small class="fs-5 text-muted">/ano</small></h2>
+                        <ul class="list-unstyled mb-4">
+                            <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Todos os benefícios</li>
+                            <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Economia de 30%</li>
+                            <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Mentorias em grupo</li>
+                        </ul>
+                        <button class="btn btn-outline-success w-100 rounded-pill btn-assinar" data-plano="3">Assinar Agora</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-white fw-bold d-flex justify-content-between align-items-center">
+                        Simulador de Pagamentos (Checkout)
+                    </div>
+                    <div class="card-body bg-light">
+                        <form id="form-checkout">
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label class="form-label">Selecionar Aluno</label>
+                                    <select class="form-select" id="check-aluno" required></select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Plano</label>
+                                    <select class="form-select" id="check-plano" required>
+                                        <option value="1">Mensal - R$ 49,00</option>
+                                        <option value="2">Semestral - R$ 249,00</option>
+                                        <option value="3">Anual - R$ 399,00</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Método de Pagamento</label>
+                                    <select class="form-select" id="check-metodo" required>
+                                        <option value="Cartão de Crédito">Cartão de Crédito</option>
+                                        <option value="PIX">PIX</option>
+                                        <option value="Boleto">Boleto (Compensação 3 dias)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="mt-4 text-end">
+                                <button type="submit" class="btn btn-success btn-lg px-5">Finalizar Compra / Assinar</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Historico de compras -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <h4 class="fw-bold mb-3">Histórico de Transações</h4>
+                <div class="table-responsive bg-white rounded shadow-sm border-0 p-3">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Transação ID</th>
+                                <th>Aluno ID</th>
+                                <th>Valor</th>
+                                <th>Método</th>
+                                <th>Data</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="lista-pagamentos">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module" src="controller/FinanceiroController.mjs"></script>
+</body>
+</html>
