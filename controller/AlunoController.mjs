@@ -80,9 +80,10 @@ function initMatriculas() {
 
             const novaMatricula = new Matricula(idAluno, idCurso);
             StorageService.insert('TbMatriculas', novaMatricula);
-            
+
             formMatricula.reset();
             renderMatriculas();
+            loadSelects();
         });
     }
     renderMatriculas();

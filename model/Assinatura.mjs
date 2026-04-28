@@ -5,5 +5,6 @@ export class Assinatura {
         this.ID_Plano = Number(id_plano);
         this.DataInicio = dataInicio;
         this.DataFim = dataFim;
+        this.Status = 'Ativa';
     }
 }

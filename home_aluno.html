@@ -40,6 +40,12 @@
                 <button class="nav-link active fw-bold text-primary" id="cursos-tab" data-bs-toggle="tab" data-bs-target="#tab-cursos" type="button" role="tab">Explorar Cursos</button>
             </li>
             <li class="nav-item" role="presentation">
+                <button class="nav-link fw-bold" id="trilhas-tab" data-bs-toggle="tab" data-bs-target="#tab-trilhas" type="button" role="tab" style="color:#0891b2">Trilhas de Aprendizado</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link fw-bold" id="meuplano-tab" data-bs-toggle="tab" data-bs-target="#tab-meuplano" type="button" role="tab" style="color:#16a34a">Meu Plano</button>
+            </li>
+            <li class="nav-item" role="presentation">
                 <button class="nav-link fw-bold" id="certificados-tab" data-bs-toggle="tab" data-bs-target="#tab-certificados" type="button" role="tab" style="color:#7c3aed">Meus Certificados</button>
             </li>
         </ul>
@@ -58,6 +64,65 @@
                 <h3 class="fw-bold mb-4">Cursos Disponíveis</h3>
                 <div class="row g-4" id="vitrine-cursos">
                     <!-- Cursos JS -->
+                </div>
+            </div>
+
+            <!-- ABA: TRILHAS -->
+            <div class="tab-pane fade" id="tab-trilhas" role="tabpanel">
+                <div class="mb-4">
+                    <h3 class="fw-bold mb-1">Trilhas de Aprendizado</h3>
+                    <p class="text-muted mb-0">Percursos estruturados para você dominar uma área completa. Matricule-se em toda a trilha de uma vez!</p>
+                </div>
+                <div class="row g-4" id="lista-trilhas-aluno">
+                    <!-- Trilhas renderizadas via JS -->
+                </div>
+            </div>
+
+            <!-- ABA: MEU PLANO -->
+            <div class="tab-pane fade" id="tab-meuplano" role="tabpanel">
+                <div class="mb-4">
+                    <h3 class="fw-bold mb-1">Meu Plano</h3>
+                    <p class="text-muted mb-0">Gerencie sua assinatura e contrate ou renove seu plano diretamente pela sua conta.</p>
+                </div>
+                <div class="row g-4">
+                    <!-- Situação atual -->
+                    <div class="col-lg-4">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-header bg-white fw-bold">
+                                <i class="bi bi-patch-check me-2 text-primary"></i>Assinatura Atual
+                            </div>
+                            <div class="card-body" id="meu-plano-status">
+                                <div class="text-center text-muted py-4">
+                                    <div class="spinner-border spinner-border-sm"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Contratar plano -->
+                    <div class="col-lg-8">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-header bg-white fw-bold">
+                                <i class="bi bi-cart-plus me-2 text-success"></i>Contratar / Renovar Plano
+                            </div>
+                            <div class="card-body">
+                                <p class="text-muted small mb-3">Selecione o plano desejado e confirme o pagamento. Você precisa estar logado com sua conta para assinar.</p>
+                                <div class="row g-2 mb-3" id="plano-options-aluno"></div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">Método de Pagamento</label>
+                                    <select class="form-select" id="aluno-metodo">
+                                        <option value="Cartão de Crédito">Cartão de Crédito</option>
+                                        <option value="PIX">PIX</option>
+                                        <option value="Boleto">Boleto (3 dias úteis)</option>
+                                    </select>
+                                </div>
+                                <input type="hidden" id="aluno-plano-selecionado" value="1">
+                                <div class="p-3 rounded bg-light border mb-3 small" id="aluno-checkout-resumo"></div>
+                                <button type="button" id="btn-assinar-aluno" class="btn btn-success w-100 fw-bold rounded-pill">
+                                    <i class="bi bi-bag-check-fill me-2"></i>Confirmar Assinatura
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 

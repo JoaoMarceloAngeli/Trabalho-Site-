@@ -55,12 +55,6 @@
                 <button class="nav-link" id="cursos-tab" data-bs-toggle="tab" data-bs-target="#cursos" type="button" role="tab">Cursos</button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="modulos-tab" data-bs-toggle="tab" data-bs-target="#modulos" type="button" role="tab">Módulos</button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="aulas-tab" data-bs-toggle="tab" data-bs-target="#aulas" type="button" role="tab">Aulas</button>
-            </li>
-            <li class="nav-item" role="presentation">
                 <button class="nav-link" id="trilhas-tab" data-bs-toggle="tab" data-bs-target="#trilhas" type="button" role="tab">Trilhas</button>
             </li>
         </ul>
@@ -127,6 +121,10 @@
                                         <input type="text" class="form-control" id="cur-titulo" required>
                                     </div>
                                     <div class="mb-3">
+                                        <label for="cur-desc" class="form-label">Descrição</label>
+                                        <textarea class="form-control" id="cur-desc" rows="2" required></textarea>
+                                    </div>
+                                    <div class="mb-3">
                                         <label for="cur-cat" class="form-label">Categoria</label>
                                         <select class="form-select" id="cur-cat" required>
                                             <option value="">Selecione...</option>
@@ -167,128 +165,11 @@
                                                 <th>Categoria</th>
                                                 <th>Nível</th>
                                                 <th>Detalhes</th>
+                                                <th>Ação</th>
                                             </tr>
                                         </thead>
                                         <tbody id="lista-cursos">
                                         </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TAB MÓDULOS -->
-            <div class="tab-pane fade" id="modulos" role="tabpanel">
-                <div class="row">
-                    <div class="col-md-4 mb-4">
-                        <div class="card shadow-sm border-0">
-                            <div class="card-header bg-white text-warning fw-bold">Novo Módulo</div>
-                            <div class="card-body">
-                                <form id="form-modulo">
-                                    <div class="mb-3">
-                                        <label for="mod-curso" class="form-label">Curso</label>
-                                        <select class="form-select" id="mod-curso" required>
-                                            <option value="">Selecione o Curso...</option>
-                                        </select>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="mod-titulo" class="form-label">Título do Módulo</label>
-                                        <input type="text" class="form-control" id="mod-titulo" required>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="mod-ordem" class="form-label">Ordem</label>
-                                        <input type="number" class="form-control" id="mod-ordem" required min="1" value="1">
-                                    </div>
-                                    <button type="submit" class="btn btn-warning w-100 text-dark fw-bold">Salvar Módulo</button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card shadow-sm border-0">
-                            <div class="card-body">
-                                <div class="table-responsive">
-                                    <table class="table table-hover align-middle">
-                                        <thead class="table-light">
-                                            <tr>
-                                                <th>Ordem</th>
-                                                <th>Título</th>
-                                                <th>Curso</th>
-                                                <th>Ação</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="lista-modulos"></tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TAB AULAS -->
-            <div class="tab-pane fade" id="aulas" role="tabpanel">
-                <div class="row">
-                    <div class="col-md-4 mb-4">
-                        <div class="card shadow-sm border-0">
-                            <div class="card-header bg-white text-info fw-bold">Nova Aula</div>
-                            <div class="card-body">
-                                <form id="form-aula">
-                                    <div class="mb-3">
-                                        <label for="aula-modulo" class="form-label">Módulo</label>
-                                        <select class="form-select" id="aula-modulo" required>
-                                            <option value="">Selecione o Módulo...</option>
-                                        </select>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="aula-titulo" class="form-label">Título da Aula</label>
-                                        <input type="text" class="form-control" id="aula-titulo" required>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="aula-tipo" class="form-label">Tipo de Conteúdo</label>
-                                        <select class="form-select" id="aula-tipo" required>
-                                            <option value="Vídeo">Vídeo</option>
-                                            <option value="Texto">Texto</option>
-                                            <option value="Quiz">Quiz</option>
-                                        </select>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="aula-url" class="form-label">URL do Conteúdo</label>
-                                        <input type="url" class="form-control" id="aula-url" placeholder="https://...">
-                                    </div>
-                                    <div class="row mb-3">
-                                        <div class="col-6">
-                                            <label for="aula-duracao" class="form-label">Duração (min)</label>
-                                            <input type="number" class="form-control" id="aula-duracao" required min="1" value="10">
-                                        </div>
-                                        <div class="col-6">
-                                            <label for="aula-ordem" class="form-label">Ordem</label>
-                                            <input type="number" class="form-control" id="aula-ordem" required min="1" value="1">
-                                        </div>
-                                    </div>
-                                    <button type="submit" class="btn btn-info w-100 text-white fw-bold">Salvar Aula</button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card shadow-sm border-0">
-                            <div class="card-body">
-                                <div class="table-responsive">
-                                    <table class="table table-hover align-middle">
-                                        <thead class="table-light">
-                                            <tr>
-                                                <th>Ord.</th>
-                                                <th>Título</th>
-                                                <th>Módulo</th>
-                                                <th>Tipo</th>
-                                                <th>Duração</th>
-                                                <th>Ação</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="lista-aulas"></tbody>
                                     </table>
                                 </div>
                             </div>

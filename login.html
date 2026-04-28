@@ -10,11 +10,12 @@
     <link rel="stylesheet" href="css/style.css">
     <style>
         body {
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            padding: 1.5rem 0;
         }
         .login-card {
             max-width: 400px;
@@ -23,6 +24,7 @@
             box-shadow: 0 15px 35px rgba(0,0,0,0.2);
             background: white;
             padding: 2rem;
+            transition: max-width 0.3s ease;
         }
     </style>
 </head>
@@ -34,7 +36,7 @@
             <p class="text-muted">Acesso à plataforma</p>
         </div>
 
-        <!-- Abas Login / Cadastro -->
+        <!-- Abas Login / Cadastro / Admin -->
         <ul class="nav nav-pills mb-3 justify-content-center" id="pills-tab" role="tablist">
             <li class="nav-item" role="presentation">
                 <button class="nav-link active" id="pills-login-tab" data-bs-toggle="pill" data-bs-target="#pills-login" type="button" role="tab">Entrar</button>
@@ -100,7 +102,7 @@
                 </form>
             </div>
         </div>
-        
+
         <div class="mt-4 text-center text-muted small border-top pt-3">
             <p>Dicas de Acesso: admin@formapro.com (Admin) | aluno@formapro.com (Aluno) | Senha: 123456</p>
             <a href="vitrine_publica.html" class="text-decoration-none fw-bold text-success"><i class="bi bi-shop"></i> Ver Cursos e Planos (Visita)</a>

@@ -1,7 +1,9 @@
 import { StorageService } from '../service/StorageService.mjs';
-import { Avaliacao } from '../model/Avaliacao.mjs';
-import { Matricula } from '../model/Matricula.mjs';
-import { Certificado } from '../model/Certificado.mjs';
+import { Avaliacao }    from '../model/Avaliacao.mjs';
+import { Matricula }    from '../model/Matricula.mjs';
+import { Certificado }  from '../model/Certificado.mjs';
+import { Assinatura }   from '../model/Assinatura.mjs';
+import { Pagamento }    from '../model/Pagamento.mjs';
 
 document.addEventListener('DOMContentLoaded', () => {
     // Auth Guard
@@ -31,6 +33,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     renderExplorarCursos();
     renderMeusCursos();
+    renderTrilhasAluno();
+    renderMeuPlano();
+    initAssinarAluno();
     initModalComentarios();
     initCertificados();
 });
@@ -43,6 +48,7 @@ window.matricularAluno = (idCurso) => {
     alert('Matriculado com sucesso!');
     renderExplorarCursos();
     renderMeusCursos();
+    loadCursosCertificadoOptions();
 };
 
 window.abrirSalaAula = (idCurso, titulo) => {
@@ -91,22 +97,34 @@ function renderExplorarCursos() {
     const cursos = StorageService.getAll('TbCursos');
     const categorias = StorageService.getAll('TbCategorias');
     const matriculas = StorageService.getAll('TbMatriculas');
-    
+    const trilhasCursos = StorageService.getAll('TbTrilhasCursos');
+    const trilhas = StorageService.getAll('TbTrilhas');
+
     vitrine.innerHTML = '';
-    
+
+    if (cursos.length === 0) {
+        vitrine.innerHTML = '<div class="col-12"><div class="alert alert-info">Nenhum curso disponível ainda.</div></div>';
+        return;
+    }
+
     cursos.forEach(cur => {
         const cat = categorias.find(c => c.ID_Categoria == cur.ID_Categoria) || { Nome: 'Geral' };
-        
-        // Verifica se o usuário já tem matrícula
         const isMatriculado = matriculas.some(m => m.ID_Usuario == user.ID_Usuario && m.ID_Curso == cur.ID_Curso);
-        
+
+        const tc = trilhasCursos.find(tc => tc.ID_Curso == cur.ID_Curso);
+        const trilha = tc ? trilhas.find(t => t.ID_Trilha == tc.ID_Trilha) : null;
+        const trilhaBadge = trilha
+            ? `<span class="badge mb-2 d-inline-block" style="background:#0891b2"><i class="bi bi-diagram-3-fill me-1"></i>Trilha: ${trilha.Titulo}</span><br>`
+            : '';
+
         const col = document.createElement('div');
         col.className = 'col-md-4 mb-4';
         col.innerHTML = `
             <div class="card h-100 shadow-sm border-0 course-card">
                 <div class="card-body p-4">
+                    ${trilhaBadge}
                     <span class="badge bg-primary mb-2">${cat.Nome}</span>
-                    <h5 class="fw-bold text-dark">${cur.Titulo}</h5>
+                    <h5 class="fw-bold text-dark mt-1">${cur.Titulo}</h5>
                     <p class="text-muted small mb-3">${cur.Descricao}</p>
                     <ul class="list-unstyled mb-3 small">
                         <li><i class="bi bi-bar-chart-fill text-warning"></i> Nível: ${cur.Nivel}</li>
@@ -115,8 +133,8 @@ function renderExplorarCursos() {
                     </ul>
                     <hr>
                     <div class="d-flex gx-2">
-                        ${isMatriculado 
-                            ? `<button class="btn btn-secondary w-100 fw-bold me-2" disabled>Já Matriculado</button>` 
+                        ${isMatriculado
+                            ? `<button class="btn btn-secondary w-100 fw-bold me-2" disabled>Já Matriculado</button>`
                             : `<button class="btn btn-success w-100 fw-bold me-2" onclick="window.matricularAluno(${cur.ID_Curso})">Matricular-se</button>`
                         }
                         <button class="btn btn-outline-dark fw-bold btn-avaliacoes" data-id="${cur.ID_Curso}" data-titulo="${cur.Titulo}">
@@ -244,6 +262,300 @@ function initModalComentarios() {
         });
     }
 }
+
+// -------------- MEU PLANO --------------
+const PLANOS_ALUNO = {
+    '1': { nome: 'Mensal',    preco: 49.00,  duracao: 1,  cor: 'primary', desc: 'Flexível, sem fidelidade',   equiv: 'R$ 49,00/mês'     },
+    '2': { nome: 'Semestral', preco: 249.00, duracao: 6,  cor: 'warning', desc: 'Economize 15%',              equiv: 'R$ 41,50/mês'     },
+    '3': { nome: 'Anual',     preco: 399.00, duracao: 12, cor: 'success', desc: 'Melhor custo-benefício 30%', equiv: 'R$ 33,25/mês'     }
+};
+
+function renderMeuPlano() {
+    const container = document.getElementById('meu-plano-status');
+    if (!container) return;
+
+    const user        = JSON.parse(sessionStorage.getItem('usuarioLogado'));
+    const assinaturas = StorageService.getAll('TbAssinaturas');
+    const pagamentos  = StorageService.getAll('TbPagamentos');
+    const agora       = new Date();
+
+    const minhas  = assinaturas
+        .filter(a => a.ID_Usuario == user.ID_Usuario)
+        .sort((a, b) => new Date(b.DataInicio) - new Date(a.DataInicio));
+
+    const assAtiva = minhas.find(a => a.Status !== 'Cancelada' && new Date(a.DataFim) > agora);
+
+    if (assAtiva) {
+        const plano         = PLANOS_ALUNO[assAtiva.ID_Plano];
+        const pag           = pagamentos.find(p => p.ID_Assinatura == assAtiva.ID_Assinatura);
+        const dataFim       = new Date(assAtiva.DataFim);
+        const diasRestantes = Math.max(0, Math.ceil((dataFim - agora) / 86400000));
+        const corDias       = diasRestantes <= 7 ? 'danger' : diasRestantes <= 30 ? 'warning' : 'success';
+
+        container.innerHTML = `
+            <div class="text-center py-2">
+                <i class="bi bi-patch-check-fill mb-2 text-${plano?.cor || 'primary'}" style="font-size:2.5rem"></i>
+                <h5 class="fw-bold mb-1">Plano ${plano?.nome || '?'}</h5>
+                <span class="badge bg-success mb-3">Ativa</span>
+                <div class="list-group list-group-flush text-start small">
+                    <div class="list-group-item px-0 border-0 py-1">
+                        <i class="bi bi-calendar-check me-2 text-muted"></i>
+                        Início: <strong>${new Date(assAtiva.DataInicio).toLocaleDateString('pt-BR')}</strong>
+                    </div>
+                    <div class="list-group-item px-0 border-0 py-1">
+                        <i class="bi bi-calendar-x me-2 text-muted"></i>
+                        Vence: <strong>${dataFim.toLocaleDateString('pt-BR')}</strong>
+                        <span class="badge bg-${corDias} ms-1">${diasRestantes}d</span>
+                    </div>
+                    ${pag ? `<div class="list-group-item px-0 border-0 py-1">
+                        <i class="bi bi-wallet2 me-2 text-muted"></i>
+                        Pago: <strong>R$ ${Number(pag.ValorPago).toFixed(2).replace('.', ',')} via ${pag.MetodoPagamento}</strong>
+                    </div>` : ''}
+                </div>
+            </div>`;
+    } else {
+        const ultima  = minhas[0];
+        const expirou = ultima && ultima.Status !== 'Cancelada' && new Date(ultima.DataFim) <= agora;
+        container.innerHTML = `
+            <div class="text-center py-4">
+                <i class="bi bi-patch-question fs-1 text-muted mb-2"></i>
+                <h6 class="fw-bold text-muted">${expirou ? 'Assinatura Expirada' : 'Sem Assinatura Ativa'}</h6>
+                <p class="text-muted small mb-0">
+                    ${expirou
+                        ? 'Sua assinatura expirou. Renove ao lado para continuar!'
+                        : 'Escolha um plano ao lado e comece a aprender!'}
+                </p>
+            </div>`;
+    }
+
+    renderPlanoOptionsAluno();
+}
+
+function renderPlanoOptionsAluno() {
+    const container = document.getElementById('plano-options-aluno');
+    if (!container) return;
+
+    container.innerHTML = Object.entries(PLANOS_ALUNO).map(([id, p]) => `
+        <div class="col-12">
+            <div class="border rounded p-2 d-flex justify-content-between align-items-center plano-btn-aluno"
+                 style="cursor:pointer;transition:box-shadow .15s" id="plano-btn-${id}"
+                 onclick="window.selecionarPlanoAluno('${id}')">
+                <div class="d-flex align-items-center gap-2">
+                    <input type="radio" name="plano-radio-aluno" value="${id}" ${id === '1' ? 'checked' : ''}>
+                    <div>
+                        <span class="fw-bold text-${p.cor}">${p.nome}</span>
+                        <span class="text-muted small ms-2">${p.desc}</span>
+                    </div>
+                </div>
+                <div class="text-end">
+                    <span class="badge bg-${p.cor} fw-bold">R$ ${p.preco.toFixed(2).replace('.', ',')}</span>
+                    <div class="text-muted" style="font-size:.7rem">${p.equiv}</div>
+                </div>
+            </div>
+        </div>`).join('');
+
+    atualizarResumoAluno('1');
+}
+
+window.selecionarPlanoAluno = (id) => {
+    document.querySelectorAll('.plano-btn-aluno').forEach(el => {
+        el.classList.remove('border-primary', 'border-warning', 'border-success', 'shadow-sm');
+    });
+    const corMap = { '1': 'primary', '2': 'warning', '3': 'success' };
+    const btn = document.getElementById(`plano-btn-${id}`);
+    if (btn) { btn.classList.add(`border-${corMap[id]}`, 'shadow-sm'); }
+    const radio = btn?.querySelector('input[type=radio]');
+    if (radio) radio.checked = true;
+    document.getElementById('aluno-plano-selecionado').value = id;
+    atualizarResumoAluno(id);
+};
+
+function atualizarResumoAluno(id) {
+    const resumo = document.getElementById('aluno-checkout-resumo');
+    const metodo = document.getElementById('aluno-metodo');
+    if (!resumo) return;
+    const p = PLANOS_ALUNO[id];
+    const met = metodo ? metodo.value : 'Cartão de Crédito';
+    resumo.innerHTML = `
+        <i class="bi bi-receipt me-1 text-muted"></i>
+        <strong>Resumo:</strong> Plano <span class="badge bg-${p.cor}">${p.nome}</span>
+        — <strong>R$ ${p.preco.toFixed(2).replace('.', ',')}</strong> via ${met}`;
+}
+
+function initAssinarAluno() {
+    document.getElementById('aluno-metodo')?.addEventListener('change', () => {
+        const id = document.getElementById('aluno-plano-selecionado')?.value || '1';
+        atualizarResumoAluno(id);
+    });
+
+    document.getElementById('btn-assinar-aluno')?.addEventListener('click', () => {
+        const user    = JSON.parse(sessionStorage.getItem('usuarioLogado'));
+        const planoId = document.getElementById('aluno-plano-selecionado')?.value || '1';
+        const metodo  = document.getElementById('aluno-metodo')?.value || 'Cartão de Crédito';
+        const plano   = PLANOS_ALUNO[planoId];
+
+        // Usuário deve estar logado (já garantido pelo auth guard)
+        if (!user?.ID_Usuario) {
+            alert('Você precisa estar logado para assinar um plano.');
+            return;
+        }
+
+        // Verificar assinatura ativa
+        const assinaturas = StorageService.getAll('TbAssinaturas');
+        const agora       = new Date();
+        const assAtiva    = assinaturas.find(a =>
+            a.ID_Usuario == user.ID_Usuario &&
+            a.Status !== 'Cancelada' &&
+            new Date(a.DataFim) > agora
+        );
+
+        if (assAtiva) {
+            const planoAtual = PLANOS_ALUNO[assAtiva.ID_Plano];
+            const ok = confirm(
+                `Você já possui o Plano ${planoAtual?.nome || '?'} ativo até ${new Date(assAtiva.DataFim).toLocaleDateString('pt-BR')}.\n\n` +
+                `Deseja contratar também o Plano ${plano.nome}?`
+            );
+            if (!ok) return;
+        }
+
+        const hoje    = new Date();
+        const dataFim = new Date();
+        dataFim.setMonth(hoje.getMonth() + plano.duracao);
+
+        const novaAss  = new Assinatura(user.ID_Usuario, planoId, hoje.toISOString(), dataFim.toISOString());
+        novaAss.Status = 'Ativa';
+        const assSaved = StorageService.insert('TbAssinaturas', novaAss);
+
+        const txId    = 'TX-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+        const novoPag = new Pagamento(assSaved.ID_Assinatura, plano.preco, metodo, txId);
+        StorageService.insert('TbPagamentos', novoPag);
+
+        alert(`Assinatura confirmada!\nPlano: ${plano.nome}\nValor: R$ ${plano.preco.toFixed(2).replace('.', ',')}\nVálido até: ${dataFim.toLocaleDateString('pt-BR')}\nTransação: ${txId}`);
+        renderMeuPlano();
+    });
+}
+
+// -------------- TRILHAS --------------
+function renderTrilhasAluno() {
+    const lista = document.getElementById('lista-trilhas-aluno');
+    if (!lista) return;
+
+    const user          = JSON.parse(sessionStorage.getItem('usuarioLogado'));
+    const trilhas       = StorageService.getAll('TbTrilhas');
+    const trilhasCursos = StorageService.getAll('TbTrilhasCursos');
+    const cursos        = StorageService.getAll('TbCursos');
+    const categorias    = StorageService.getAll('TbCategorias');
+    const matriculas    = StorageService.getAll('TbMatriculas');
+
+    lista.innerHTML = '';
+
+    if (trilhas.length === 0) {
+        lista.innerHTML = `<div class="col-12">
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle me-2"></i>
+                Nenhuma trilha disponível ainda. Aguarde o administrador criar trilhas de aprendizado em Módulo Acadêmico.
+            </div></div>`;
+        return;
+    }
+
+    trilhas.forEach(trilha => {
+        const cat = categorias.find(c => c.ID_Categoria == trilha.ID_Categoria) || { Nome: 'Geral' };
+
+        const cursosNaTrilha = [...trilhasCursos]
+            .filter(tc => tc.ID_Trilha == trilha.ID_Trilha)
+            .sort((a, b) => a.Ordem - b.Ordem)
+            .map(tc => cursos.find(c => c.ID_Curso == tc.ID_Curso))
+            .filter(Boolean);
+
+        const matriculadosNaTrilha = cursosNaTrilha.filter(c =>
+            matriculas.some(m => m.ID_Usuario == user.ID_Usuario && m.ID_Curso == c.ID_Curso)
+        );
+
+        const progresso = cursosNaTrilha.length > 0
+            ? Math.round((matriculadosNaTrilha.length / cursosNaTrilha.length) * 100)
+            : 0;
+
+        const todosMatriculados = cursosNaTrilha.length > 0 &&
+            matriculadosNaTrilha.length === cursosNaTrilha.length;
+
+        const corBarra = progresso === 100 ? 'bg-success' : progresso > 0 ? 'bg-primary' : 'bg-secondary';
+
+        const listaCursos = cursosNaTrilha.map((cur, i) => {
+            const matriculado = matriculas.some(m => m.ID_Usuario == user.ID_Usuario && m.ID_Curso == cur.ID_Curso);
+            return `
+                <li class="list-group-item px-0 py-1 border-0 d-flex align-items-center gap-2 small">
+                    <span class="badge bg-secondary rounded-pill" style="min-width:22px;text-align:center">${i + 1}</span>
+                    <span class="${matriculado ? 'text-success fw-semibold' : 'text-dark'}" style="flex:1">${cur.Titulo}</span>
+                    ${matriculado ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-circle text-muted"></i>'}
+                </li>`;
+        }).join('');
+
+        const col = document.createElement('div');
+        col.className = 'col-md-6 col-lg-4';
+        col.innerHTML = `
+            <div class="card shadow border-0 h-100" style="border-top:4px solid #0891b2 !important;">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <span class="badge" style="background:#0891b2">${cat.Nome}</span>
+                        <span class="badge bg-light text-dark border">${cursosNaTrilha.length} curso${cursosNaTrilha.length !== 1 ? 's' : ''}</span>
+                    </div>
+                    <h5 class="fw-bold mt-2 mb-1">${trilha.Titulo}</h5>
+                    <p class="text-muted small mb-3">${trilha.Descricao || 'Trilha de aprendizado estruturada.'}</p>
+
+                    <div class="d-flex justify-content-between small mb-1">
+                        <span class="text-muted">Progresso</span>
+                        <span class="fw-bold">${matriculadosNaTrilha.length}/${cursosNaTrilha.length} concluídos</span>
+                    </div>
+                    <div class="progress mb-3" style="height:8px;">
+                        <div class="progress-bar ${corBarra}" style="width:${progresso}%"></div>
+                    </div>
+
+                    ${cursosNaTrilha.length > 0 ? `
+                    <ul class="list-group list-group-flush mb-3 border-top pt-2">
+                        ${listaCursos}
+                    </ul>` : '<p class="text-muted small mb-3">Nenhum curso associado ainda.</p>'}
+
+                    ${todosMatriculados
+                        ? `<button class="btn btn-success w-100 fw-bold" disabled>
+                               <i class="bi bi-check-circle-fill me-1"></i>Matriculado em toda a trilha
+                           </button>`
+                        : `<button class="btn w-100 fw-bold text-white" style="background:#0891b2" onclick="window.matricularEmTrilha(${trilha.ID_Trilha})">
+                               <i class="bi bi-lightning-fill me-1"></i>Matricular em toda a trilha
+                           </button>`
+                    }
+                </div>
+            </div>
+        `;
+        lista.appendChild(col);
+    });
+}
+
+window.matricularEmTrilha = (idTrilha) => {
+    const user          = JSON.parse(sessionStorage.getItem('usuarioLogado'));
+    const trilhasCursos = StorageService.getAll('TbTrilhasCursos').filter(tc => tc.ID_Trilha == idTrilha);
+    const matriculas    = StorageService.getAll('TbMatriculas');
+
+    let novas = 0;
+    trilhasCursos.forEach(tc => {
+        const jaMatriculado = matriculas.some(m => m.ID_Usuario == user.ID_Usuario && m.ID_Curso == tc.ID_Curso);
+        if (!jaMatriculado) {
+            const m = new Matricula(user.ID_Usuario, tc.ID_Curso);
+            StorageService.insert('TbMatriculas', m);
+            novas++;
+        }
+    });
+
+    if (novas === 0) {
+        alert('Você já está matriculado em todos os cursos desta trilha!');
+    } else {
+        alert(`Matriculado com sucesso em ${novas} curso${novas !== 1 ? 's' : ''} da trilha!`);
+    }
+
+    renderTrilhasAluno();
+    renderExplorarCursos();
+    renderMeusCursos();
+    loadCursosCertificadoOptions();
+};
 
 // -------------- CERTIFICADOS --------------
 function initCertificados() {
@@ -384,8 +696,12 @@ window.imprimirCertificado = (codigo, nomeAluno, nomeCurso, data) => {
             <div class="data">Emitido em: ${data}</div>
             <div class="codigo">Código: ${codigo}</div>
         </div>
+        <div style="text-align:center; margin-top:32px;">
+            <button onclick="window.print()" style="background:#7c3aed; color:white; border:none; padding:12px 36px; font-size:1rem; border-radius:8px; cursor:pointer; font-weight:bold;">
+                &#128438; Imprimir / Salvar PDF
+            </button>
+        </div>
     </div>
-    <script>window.onload = () => window.print();<\/script>
 </body>
 </html>`;
     const blob = new Blob([html], { type: 'text/html' });

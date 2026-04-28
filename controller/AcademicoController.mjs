@@ -82,12 +82,13 @@ function initCursos() {
         formCurso.addEventListener('submit', (e) => {
             e.preventDefault();
             const tit = document.getElementById('cur-titulo').value.trim();
+            const desc = document.getElementById('cur-desc').value.trim();
             const cat = document.getElementById('cur-cat').value;
             const niv = document.getElementById('cur-nivel').value;
             const aulas = document.getElementById('cur-aulas').value;
             const horas = document.getElementById('cur-horas').value;
 
-            const novoCurso = new Curso(tit, 'Descrição não informada.', 1, cat, niv, aulas, horas);
+            const novoCurso = new Curso(tit, desc, 1, cat, niv, aulas, horas);
             StorageService.insert('TbCursos', novoCurso);
 
             formCurso.reset();
@@ -130,10 +131,44 @@ function renderCursos() {
             <td>
                 <span class="text-muted small">${cur.TotalHoras}h / ${cur.TotalAulas} aulas</span>
             </td>
+            <td>
+                <button class="btn btn-sm btn-outline-danger" onclick="window.deletarCurso(${cur.ID_Curso})">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </td>
         `;
         lista.appendChild(tr);
     });
 }
+
+window.deletarCurso = (id) => {
+    if (confirm('Deseja excluir este curso? Módulos e aulas vinculados também serão removidos.')) {
+        const modulos = StorageService.getAll('TbModulos').filter(m => m.ID_Curso == id);
+        const idModulos = modulos.map(m => m.ID_Modulo);
+
+        let aulas = StorageService.getAll('TbAulas');
+        aulas = aulas.filter(a => !idModulos.includes(a.ID_Modulo));
+        StorageService.saveAll('TbAulas', aulas);
+
+        let modList = StorageService.getAll('TbModulos');
+        modList = modList.filter(m => m.ID_Curso != id);
+        StorageService.saveAll('TbModulos', modList);
+
+        let trilhasCursos = StorageService.getAll('TbTrilhasCursos');
+        trilhasCursos = trilhasCursos.filter(tc => tc.ID_Curso != id);
+        StorageService.saveAll('TbTrilhasCursos', trilhasCursos);
+
+        StorageService.delete('TbCursos', 'ID_Curso', id);
+
+        renderCursos();
+        renderModulos();
+        renderAulas();
+        renderTrilhasCursos();
+        loadModCursoOptions();
+        loadAulaModuloOptions();
+        loadTCCursoOptions();
+    }
+};
 
 // -------------- MÓDULOS --------------
 function initModulos() {

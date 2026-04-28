@@ -2,7 +2,6 @@ import { StorageService } from '../service/StorageService.mjs';
 import { Usuario } from '../model/Usuario.mjs';
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Inicializar o banco para garantir que temos o Admin e o Aluno Teste criados
     StorageService.initDb();
 
     const formLogin = document.getElementById('form-login');
@@ -18,10 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const user = usuarios.find(u => u.Email === email && u.SenhaHash === senha);
 
             if (user) {
-                // Guarda o usuário logado na sessão local
                 sessionStorage.setItem('usuarioLogado', JSON.stringify(user));
-                
-                // Redirecionamento baseado no Papel ou E-mail
                 if (user.Papel === 'Admin' || user.Email === 'admin@formapro.com') {
                     window.location.href = 'index.html';
                 } else {
@@ -64,3 +60,4 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
